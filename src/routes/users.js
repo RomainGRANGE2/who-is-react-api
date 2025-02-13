@@ -99,7 +99,7 @@ export function usersRoutes(app) {
         const user = await registerUser(request.body, app.bcrypt);
 
         if (user) {
-            const confirmationLink = `http://localhost:3000/confirm?token=${user.confirmationToken}`;
+            const confirmationLink = `https://who-is-react-api.onrender.com/confirm?token=${user.confirmationToken}`;
 
             const emailHtml = getConfirmationEmailTemplate(user.firstName, confirmationLink);
 
@@ -142,7 +142,7 @@ export function usersRoutes(app) {
         });
 
         if (!user) {
-            reply.redirect('http://localhost:5173/expired-token')
+            reply.redirect('https://who-is-react.vercel.app/expired-token')
         }
 
         user.verified = true;
@@ -150,7 +150,7 @@ export function usersRoutes(app) {
         user.confirmationTokenExpires = null;
         await user.save();
 
-        reply.redirect('http://localhost:5173/confirmation-success')
+        reply.redirect('https://who-is-react.vercel.app/confirmation-success')
     });
 
 
