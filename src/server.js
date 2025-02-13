@@ -108,6 +108,9 @@ gamesRoutes(app);
 /**********
  * START
  **********/
+
+const port = process.env.PORT || 4000;
+
 const start = async () => {
 	try {
 		await sequelize
@@ -121,7 +124,7 @@ const start = async () => {
 					error
 				);
 			});
-		await app.listen({ port: process.env.PORT || 3000 });
+		await app.listen({ port: port });
 		console.log(
 			"Serveur Fastify lancé sur " + chalk.blue("http://localhost:3000")
 		);
