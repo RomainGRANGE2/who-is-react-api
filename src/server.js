@@ -33,7 +33,10 @@ await app
 		saltWorkFactor: 12,
 	})
 	.register(cors, {
-		origin: "*",
+		origin: ["https://who-is-react.vercel.app/", "*"], // Autorise ton site front sur Vercel et en local
+		methods: ["GET", "POST", "PATCH", "DELETE"], // Ajoute les méthodes nécessaires
+		allowedHeaders: ["Content-Type", "Authorization"], // Ajoute les headers nécessaires
+		credentials: true // Permet l'envoi des cookies si besoin
 	})
 	.register(fastifySwagger, {
 		openapi: {
