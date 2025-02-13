@@ -33,7 +33,7 @@ await app
 		saltWorkFactor: 12,
 	})
 	.register(cors, {
-		origin: "https://who-is-react.vercel.app/",
+		origin: "*",
 	})
 	.register(fastifySwagger, {
 		openapi: {
@@ -75,7 +75,7 @@ await app
 	})
 	.register(socketioServer, {
 		cors: {
-			origin: "https://who-is-react.vercel.app/",
+			origin: "*",
 		}
 	})
 /**********
