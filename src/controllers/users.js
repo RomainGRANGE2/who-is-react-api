@@ -59,28 +59,28 @@ export async function registerUser(userDatas, bcrypt) {
         return {error: "Tous les champs sont obligatoires"};
     }
 
-    // Vérification que l'email n'est pas déjà utilisé
+
     const {count: emailCount} = await findAndCountAllUsersByEmail(email);
     if (emailCount > 0) {
         return {error: "L'adresse email est déjà utilisée."};
     }
 
-    //vérification que le pseudo n'est pas déjà utilisé
+
     const {count: usernameCount} = await findAndCountAllUsersByUsername(username);
     if (usernameCount > 0) {
         return {error: "Le nom d'utilisateur est déjà utilisé."};
     }
-    //création de l'identifiant
+
     let id = await generateID((lastname.substring(0, 3) + firstname.substring(0, 3)).toUpperCase());
 
-    // Génération du token de confirmation avec `crypto-js`
-    const confirmationToken = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex); // Générer un token de 32 bytes en hexadécimal
-    const confirmationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // Le token expire dans 24 heures
 
-    //hashage du mot de passe
+    const confirmationToken = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
+    const confirmationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+
     const hashedPassword = await bcrypt.hash(password);
 
-    // Création de l'utilisateur dans la base de données
+
     const user = {
         id,
         firstname,
@@ -102,7 +102,7 @@ export async function loginUser(userDatas, app) {
     if (!email || !password) {
         return {error: "Tous les champs sont obligatoires"};
     }
-    //vérification que l'email est utilisé
+
     const {count, rows} = await findAndCountAllUsersByEmail(email);
     if (count === 0) {
         return {
@@ -113,7 +113,7 @@ export async function loginUser(userDatas, app) {
             error: "Votre compte n'est pas encore vérifié. Veuillez vérifier votre boîte mail.",
         };
     }
-    //récupération de l'utilisateur
+
     const user = await User.findOne({
         where: {
             email: {
@@ -121,12 +121,12 @@ export async function loginUser(userDatas, app) {
             },
         },
     });
-    //comparaison des mots de passe
+
     const match = await app.bcrypt.compare(password, user.password);
     if (!match) {
         return {error: "Mot de passe incorrect"};
     }
-    // Générer le JWT après une authentification réussie
+
     const token = app.jwt.sign(
         {id: user.id, username: user.username},
         {expiresIn: "3h"}

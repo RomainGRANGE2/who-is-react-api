@@ -5,13 +5,13 @@ import {
     registerUser,
 } from "../controllers/users.js";
 
-import nodemailer from 'nodemailer'; // Importer nodemailer
+import nodemailer from 'nodemailer';
 import mjml from 'mjml';
-import User from "../models/users.js"; // Importer mjml
+import User from "../models/users.js";
 import {Op} from "sequelize";
 import {getGame} from "../controllers/games.js";
 
-// Fonction pour générer le template de confirmation
+
 const getConfirmationEmailTemplate = (firstName, confirmationLink) => {
     const mjmlTemplate = `
     <mjml>
@@ -84,18 +84,18 @@ export function usersRoutes(app) {
         "/logout",
         {preHandler: [app.authenticate]},
         async (request, reply) => {
-            const token = request.headers["authorization"].split(" ")[1]; // Récupérer le token depuis l'en-tête Authorization
+            const token = request.headers["authorization"].split(" ")[1];
 
-            // Ajouter le token à la liste noire
+
             blacklistedTokens.push(token);
 
             reply.send({logout: true});
         }
     );
 
-    // Inscription
+
     app.post("/register", async (request, reply) => {
-        // Créer l'utilisateur (fonction existante)
+
         const user = await registerUser(request.body, app.bcrypt);
 
         if (user) {
@@ -110,7 +110,7 @@ export function usersRoutes(app) {
                 html: emailHtml,
             };
 
-            // Envoyer l'email de confirmation
+
             await transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.log('Error sending confirmation email:', error);
@@ -136,7 +136,7 @@ export function usersRoutes(app) {
             where: {
                 confirmationToken: token,
                 confirmationTokenExpires: {
-                    [Op.gt]: new Date(), // token doit être encore valide
+                    [Op.gt]: new Date(),
                 }
             }
         });

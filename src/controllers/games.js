@@ -5,12 +5,12 @@ export async function createGame(userId) {
 		return { error: "L'identifiant du joueur est manquant" };
 	}
 	const datas = await Game.create({ creator: userId });
-	//console.log(datas.dataValues.id);
+
 	return { gameId: datas.dataValues.id };
 }
 
 export async function updateGame(request) {
-	//console.log(request.params);
+
 	const userId = request.body.userId;
 
 	if (request.params.length < 2) {
@@ -41,7 +41,7 @@ export async function updateGame(request) {
 			}
 			await game.setPlayer2(userId);
 		case "start":
-			//update state
+
 			game.state = "playing";
 
 			break;

@@ -1,5 +1,5 @@
 import chalk from "chalk";
-//pour fastify
+
 import fastify from "fastify";
 import fastifyBcrypt from "fastify-bcrypt";
 import cors from "@fastify/cors";
@@ -7,13 +7,13 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastifyJWT from "@fastify/jwt";
 import socketioServer from "fastify-socket.io"
-//routes
+
 import { usersRoutes } from "./routes/users.js";
 import { gamesRoutes } from "./routes/games.js";
-//bdd
+
 import { sequelize } from "./bdd.js";
 
-//Test de la connexion
+
 try {
 	sequelize.authenticate();
 	console.log(chalk.grey("Connecté à la base de données MySQL!"));
@@ -27,16 +27,16 @@ try {
  */
 let blacklistedTokens = [];
 const app = fastify();
-//Ajout du plugin fastify-bcrypt pour le hash du mdp
+
 await app
 	.register(fastifyBcrypt, {
 		saltWorkFactor: 12,
 	})
 	.register(cors, {
-		origin: ["https://who-is-react.vercel.app/", "*"], // Autorise ton site front sur Vercel et en local
+		origin: ["https://who-is-react.vercel.app/", "*"],
 		methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization"], // Ajoute les headers nécessaires
-		credentials: true // Permet l'envoi des cookies si besoin
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true
 	})
 	.register(fastifySwagger, {
 		openapi: {
@@ -87,12 +87,12 @@ await app
 app.get("/", (request, reply) => {
 	reply.send({ documentationURL: "http://localhost:3000/documentation" });
 });
-// Fonction pour décoder et vérifier le token
+
 app.decorate("authenticate", async (request, reply) => {
 	try {
 		const token = request.headers["authorization"].split(" ")[1];
 
-		// Vérifier si le token est dans la liste noire
+
 		if (blacklistedTokens.includes(token)) {
 			return reply
 				.status(401)
@@ -103,9 +103,9 @@ app.decorate("authenticate", async (request, reply) => {
 		reply.send(err);
 	}
 });
-//gestion utilisateur
+
 usersRoutes(app);
-//gestion des jeux
+
 gamesRoutes(app);
 
 /**********
@@ -157,14 +157,14 @@ app.io.on("connection", (socket) => {
 		socket.join(gameId);
 		console.log(`${user.username} a rejoint la partie ${gameId}`);
 
-		// Envoyer la liste des joueurs et le tour actuel
+
 		app.io.to(gameId).emit("updatePlayers", games[gameId].players);
 		app.io.to(gameId).emit("updateTurn", games[gameId].turn);
 	});
 
 	socket.on("startGame", (gameId) => {
 		if (games[gameId] && games[gameId].players.length === 2) {
-			// Choisir un joueur au hasard pour commencer
+
 			const firstPlayer = games[gameId].players[Math.floor(Math.random() * 2)];
 			games[gameId].turn = firstPlayer.id;
 
@@ -175,7 +175,7 @@ app.io.on("connection", (socket) => {
 		}
 	});
 
-	// 🎤 Un joueur pose une question
+
 	socket.on("askQuestion", ({ gameId, question }) => {
 		if (games[gameId]) {
 			console.log(`Question posée dans la partie ${gameId} : ${question}`);
@@ -183,7 +183,7 @@ app.io.on("connection", (socket) => {
 		}
 	});
 
-	// 🗣 L’autre joueur répond (Oui / Non)
+
 	socket.on("answerQuestion", ({ gameId, answer }) => {
 		if (games[gameId]) {
 			console.log(`Réponse dans la partie ${gameId} : ${answer}`);
@@ -191,7 +191,7 @@ app.io.on("connection", (socket) => {
 		}
 	});
 
-	// 🔄 Fin du tour : Le joueur indique qu'il a terminé d'éliminer des personnages
+
 	socket.on("endTurn", (gameId) => {
 		if (games[gameId]) {
 			const currentTurn = games[gameId].turn;
@@ -203,7 +203,7 @@ app.io.on("connection", (socket) => {
 		}
 	});
 
-	// 🔄 Passage de tour (Déjà présent)
+
 	socket.on("nextTurn", (gameId) => {
 		if (games[gameId]) {
 			const currentTurn = games[gameId].turn;
@@ -219,10 +219,10 @@ app.io.on("connection", (socket) => {
 		if (games[gameId]) {
 			const player = games[gameId].players.find(p => p.id === userId);
 			if (player) {
-				player.selectedCharacter = character; // Associe le personnage au joueur
+				player.selectedCharacter = character;
 				console.log(`${player.username} a choisi ${character.name}`);
 
-				// Envoie la mise à jour aux joueurs
+
 				app.io.to(gameId).emit("updateSelectedCharacters", games[gameId].players);
 			}
 		}
@@ -243,7 +243,7 @@ app.io.on("connection", (socket) => {
 	});
 
 
-	// ❌ Un joueur se déconnecte
+
 	socket.on("disconnect", () => {
 		console.log("Client déconnecté:", socket.id);
 
@@ -258,7 +258,7 @@ app.io.on("connection", (socket) => {
 					console.log(`La partie ${gameId} est supprimée.`);
 				}
 
-				// ✅ Vérification avant d'émettre l'événement
+
 				if (games[gameId]) {
 					app.io.to(gameId).emit("updatePlayers", games[gameId].players);
 				}
